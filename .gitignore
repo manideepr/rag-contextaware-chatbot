@@ -1,0 +1,22 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore virtual environments
+venv/
+.env/
+env/
+.venv/
+
+# Ignore dotenv secrets
+.env
+
+# Ignore OS files
+Thumbs.db
+.DS_Store
+
+# Ignore Jupyter
+.ipynb_checkpoints/
+
+# Ignore VSCode settings
+.vscode/
