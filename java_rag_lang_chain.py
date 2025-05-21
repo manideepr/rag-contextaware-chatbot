@@ -15,8 +15,11 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableMap, RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
+from fastapi.responses import JSONResponse
 
-load_dotenv
+load_dotenv()
 
 # ==== SETUP ====
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Your OpenAI API key
@@ -100,23 +103,62 @@ output_parser = StrOutputParser()
 
 # === CHAT LOOP ===
 print("💬 Chat with your Java codebase (Ctrl+C or 'exit' to quit)\n")
-while True:
-    query = input("👤 You: ").strip()
-    if query.lower() in {"exit", "quit"}:
-        break
+# while True:
+#     query = input("👤 You: ").strip()
+#     if query.lower() in {"exit", "quit"}:
+#         break
 
+#     try:
+#         # Embed the query and fetch similar chunks
+#         query_vector = embedding_model.embed_query(query)
+#         docs = vectorstore.similarity_search_by_vector(query_vector, k=3)
+#         context = format_docs(docs, max_chars=5000)
+
+#         # Build and run the prompt
+#         chain = prompt | llm | output_parser
+#         response = chain.invoke({"context": context, "question": query})
+
+#         print("\n🤖 GPT:\n" + response)
+#         print("-" * 60)
+
+#     except Exception as e:
+#         print(f"❌ Error: {e}")
+
+# --- FastAPI code starts here ---
+
+app = FastAPI()
+
+class ChatRequest(BaseModel):
+    question: str
+
+@app.get("/")
+async def root():
+    print("Hello from root!")
+    return {"message": "Hello!"}
+
+@app.post("/chat")
+def chat_endpoint(request: ChatRequest):
+    print(f"👤 You: {request.question}")
+    query = request.question.strip()
+    if query.lower() in {"exit", "quit"}:
+        return {"answer": ""}
     try:
         # Embed the query and fetch similar chunks
         query_vector = embedding_model.embed_query(query)
         docs = vectorstore.similarity_search_by_vector(query_vector, k=3)
         context = format_docs(docs, max_chars=5000)
-
         # Build and run the prompt
         chain = prompt | llm | output_parser
         response = chain.invoke({"context": context, "question": query})
 
         print("\n🤖 GPT:\n" + response)
         print("-" * 60)
-
+        return response
     except Exception as e:
         print(f"❌ Error: {e}")
+    
+    # try:
+    #     result = qa_chain({"question": request.question})
+    #     return {"answer": result["answer"]}
+    # except Exception as e:
+    #     return {"error": str(e)}

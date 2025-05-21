@@ -5,7 +5,7 @@ import weaviate
 from weaviate.auth import AuthApiKey
 from dotenv import load_dotenv
 
-load_dotenv
+load_dotenv()
 #from weaviate.collections.classes.config import Property, DataType
 
 # ==== CONFIGURATION ====
